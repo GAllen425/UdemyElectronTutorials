@@ -1,0 +1,11 @@
+{
+  "name": "todoapp",
+  "version": "1.0.0",
+  "description": "To-Do app",
+  "main": "index.js",
+  "scripts": {
+      "electron": "electron ."
+  },
+  "author": "",
+  "license": "ISC"
+}
