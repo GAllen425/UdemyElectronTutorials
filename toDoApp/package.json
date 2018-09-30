@@ -4,8 +4,11 @@
   "description": "To-Do app",
   "main": "index.js",
   "scripts": {
-      "electron": "electron ."
+    "start": "electron ."
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^3.0.2"
+  }
 }
