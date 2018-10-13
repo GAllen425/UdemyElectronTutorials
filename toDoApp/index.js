@@ -1,24 +1,52 @@
 const electron  = require('electron');
 
-const { app, BrowserWindow, Menu } = electron;
+const { app, BrowserWindow, Menu, ipcMain } = electron;
 
 
-let mainWindow;
+let mainWindow, addWindow;
 
 app.on('ready', () => {
     mainWindow = new BrowserWindow({});
     mainWindow.loadURL(`file://${__dirname}/main.html`);
+    mainWindow.on('closed', () => app.quit());
 
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
 });
 
+function createAddWindow() {
+    addWindow = new BrowserWindow({
+        width: 300,
+        height: 200,
+        title: 'Add New ToDo'
+    });
+    addWindow.loadURL(`file://${__dirname}/add.html`);
+    addWindow.on('closed', () => addWindow = null);
+}
+
+ipcMain.on('todo:add', (event, todo) => {
+    mainWindow.webContents.send('todo:add', todo);
+    addWindow.close();
+});
+
+function clearToDoList() {
+    mainWindow.webContents.send('todo:clear');
+}
+
 const menuTemplate = [
     {
         label: 'File', 
         submenu: [
-            {   label: 'New ToDo' },
+            {   label: 'New ToDo',
+                click() { createAddWindow();}
+            },
+            {
+                label: 'Clear ToDos',
+                accelerator: process.platform === 'darwin' ? 'Command+K' : 'Ctrl+k',
+                click(){ clearToDoList() }
+            },
             {   label: 'Quit' ,
+                accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
                 click() {
                     app.quit();
                 }
@@ -29,4 +57,26 @@ const menuTemplate = [
 
 if (process.platform === 'darwin'){
     menuTemplate.unshift({});
+}
+    
+//'production'
+//'development'
+//'staging'
+//'test'
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV !== 'production')
+{
+    menuTemplate.push({
+        label: 'View',
+        submenu: [
+            { role: 'reload' },
+            {
+                label: 'Toggle Developer Tools',
+                accelerator: process.platform === 'darwin' ? 'Command+Alt+I' : 'Ctrl+Shift+I',
+                click (item, focusedWindow) {
+                    focusedWindow.toggleDevTools();
+                }
+            }
+        ]
+    });
 }
